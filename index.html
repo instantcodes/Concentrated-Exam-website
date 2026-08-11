@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S5 Exam Countdown — LMCST CSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     Everything below is built from these variables. Change a
+     value here and it updates everywhere it's used.
+     ============================================================ */
+  :root{
+    --bg:#0F1922;
+    --bg-2:#0C1620;
+    --panel:#17232F;
+    --panel-2:#1E3040;
+    --line: rgba(233,224,190,0.14);
+    --paper:#E7DAA9;
+    --paper-2:#DCC988;
+    --ink:#2C2113;
+    --ink-muted:#6B5A3B;
+    --text:#ECEFF3;
+    --muted:#8FA1B3;
+    --gold:#CBA135;
+    --red:#C2493C;
+    --green:#3F8161;
+    --radius:14px;
+    --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --font-sans:'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top, var(--bg-2), var(--bg) 60%);
+    color:var(--text);
+    font-family:var(--font-sans);
+    line-height:1.5;
+    padding-bottom:60px;
+  }
+  a{ color:var(--gold); }
+  ::selection{ background:var(--gold); color:var(--ink); }
+
+  :focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:3px;
+  }
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+
+  /* ---------------- Masthead ---------------- */
+  .masthead{
+    padding:48px 0 28px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .masthead h1{
+    font-family:var(--font-mono);
+    font-weight:800;
+    font-size:clamp(1.7rem, 4.5vw, 2.6rem);
+    letter-spacing:-0.01em;
+    margin:10px 0 8px;
+  }
+  .masthead h1 .accent{ color:var(--gold); }
+  .masthead p{
+    color:var(--muted);
+    font-size:.95rem;
+    max-width:480px;
+    margin:0 auto;
+  }
+
+  /* ---------------- Countdown ticket ---------------- */
+  .countdown-section{ padding:36px 0; }
+  .countdown-ticket{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:30px 24px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  .countdown-label{
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .countdown-subject{
+    font-family:var(--font-mono);
+    font-weight:800;
+    font-size:clamp(1.2rem, 3.4vw, 1.7rem);
+    color:var(--text);
+    margin-bottom:22px;
+  }
+  .countdown-subject .code{
+    color:var(--gold);
+    margin-right:8px;
+  }
+  .flap-group{
+    display:flex;
+    justify-content:center;
+    gap:clamp(8px, 2.5vw, 22px);
+    flex-wrap:wrap;
+  }
+  .flap-unit{ display:flex; flex-direction:column; align-items:center; }
+  .flap-digit{
+    font-family:var(--font-mono);
+    font-weight:800;
+    font-size:clamp(1.8rem, 6vw, 2.6rem);
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 6px;
+    min-width:70px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.03);
+    transition:transform .18s ease;
+    transform-style:preserve-3d;
+  }
+  .flap-digit.flipping{ transform:rotateX(60deg); }
+  .flap-label{
+    margin-top:8px;
+    font-size:.68rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-family:var(--font-mono);
+  }
+  .flap-colon{
+    font-family:var(--font-mono);
+    font-size:clamp(1.4rem, 4vw, 2rem);
+    color:var(--muted);
+    align-self:center;
+    margin-top:-18px;
+  }
+  .countdown-note{
+    margin-top:20px;
+    font-size:.85rem;
+    color:var(--muted);
+  }
+  .countdown-note.urgent{ color:var(--red); }
+  .countdown-note.done{ color:var(--green); }
+
+  @media (prefers-reduced-motion: reduce){
+    .flap-digit{ transition:none; }
+    .flap-digit.flipping{ transform:none; }
+  }
+
+  /* ---------------- Section heading ---------------- */
+  .section-heading{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin:8px 0 16px;
+  }
+  .section-heading .num{
+    font-family:var(--font-mono);
+    color:var(--gold);
+    font-weight:700;
+  }
+  .section-heading h2{
+    font-family:var(--font-mono);
+    font-size:1.05rem;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    margin:0;
+  }
+  .section-heading .hint{
+    margin-left:auto;
+    font-size:.8rem;
+    color:var(--muted);
+  }
+
+  /* ---------------- Departure board ---------------- */
+  .board-section{ padding:26px 0; }
+  .table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--panel);
+  }
+  table.board{
+    width:100%;
+    border-collapse:collapse;
+    min-width:640px;
+    font-family:var(--font-mono);
+    font-size:.86rem;
+  }
+  table.board th{
+    text-align:left;
+    padding:12px 14px;
+    color:var(--muted);
+    font-size:.7rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line);
+  }
+  table.board td{
+    padding:13px 14px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  table.board tr:last-child td{ border-bottom:none; }
+  table.board tr.is-done{ opacity:.5; }
+  table.board tr.is-next td{ background:rgba(203,161,53,0.08); }
+  .board-subject{ font-family:var(--font-sans); font-weight:600; }
+  .board-code{ color:var(--gold); font-size:.78rem; }
+  .status-pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:.68rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+  }
+  .status-pill.done{ color:var(--green); border-color:var(--green); }
+  .status-pill.now{ color:var(--red); border-color:var(--red); animation:pulse 1.6s ease-in-out infinite; }
+  .status-pill.next{ color:var(--gold); border-color:var(--gold); }
+  .status-pill.later{ color:var(--muted); }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+  @media (prefers-reduced-motion: reduce){ .status-pill.now{ animation:none; } }
+
+  /* ---------------- Prep cards ---------------- */
+  .prep-section{ padding:26px 0; }
+  .prep-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(270px, 1fr));
+    gap:20px;
+  }
+  .ticket-card{
+    position:relative;
+    background:linear-gradient(180deg, var(--paper), var(--paper-2));
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    overflow:hidden;
+    box-shadow:0 14px 30px rgba(0,0,0,.3);
+  }
+  .ticket-head .ticket-code{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:.72rem;
+    letter-spacing:.08em;
+    color:var(--ink-muted);
+  }
+  .ticket-head h3{
+    font-family:var(--font-mono);
+    font-size:1.05rem;
+    margin:4px 0 4px;
+    line-height:1.25;
+  }
+  .ticket-head .ticket-date{
+    font-size:.78rem;
+    color:var(--ink-muted);
+  }
+  .elective-picker{
+    margin-top:10px;
+  }
+  .elective-picker label{
+    display:block;
+    font-size:.7rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+    margin-bottom:4px;
+  }
+  .elective-picker select{
+    width:100%;
+    padding:7px 8px;
+    border-radius:8px;
+    border:1px solid rgba(43,32,19,.3);
+    background:rgba(255,255,255,.4);
+    font-family:var(--font-sans);
+    font-size:.85rem;
+    color:var(--ink);
+  }
+  .ticket-perf{
+    position:relative;
+    height:0;
+    margin:16px -22px;
+    border-top:2px dashed rgba(43,32,19,.35);
+  }
+  .ticket-perf::before, .ticket-perf::after{
+    content:'';
+    position:absolute;
+    top:-10px;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:var(--bg);
+  }
+  .ticket-perf::before{ left:-10px; }
+  .ticket-perf::after{ right:-10px; }
+
+  .mini-progress-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .mini-progress{
+    flex:1;
+    height:7px;
+    border-radius:999px;
+    background:rgba(43,32,19,.15);
+    overflow:hidden;
+  }
+  .mini-progress-fill{
+    height:100%;
+    width:0%;
+    background:var(--green);
+    transition:width .3s ease;
+  }
+  .mini-progress-text{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--ink-muted);
+    white-space:nowrap;
+  }
+
+  .task-list{
+    list-style:none;
+    margin:0 0 10px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:220px;
+    overflow-y:auto;
+  }
+  .task-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    font-size:.87rem;
+    background:rgba(255,255,255,.28);
+    border-radius:8px;
+    padding:6px 8px;
+  }
+  .task-item label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    flex:1;
+    min-width:0;
+  }
+  .task-item span{ word-break:break-word; }
+  .task-item span.done{
+    text-decoration:line-through;
+    color:var(--ink-muted);
+  }
+  .task-item button{
+    border:none;
+    background:transparent;
+    color:var(--ink-muted);
+    cursor:pointer;
+    font-size:.9rem;
+    padding:2px 6px;
+    border-radius:6px;
+  }
+  .task-item button:hover{ background:rgba(193,73,60,.18); color:var(--red); }
+  .task-empty{
+    font-size:.8rem;
+    color:var(--ink-muted);
+    font-style:italic;
+    padding:4px 0 10px;
+  }
+
+  .task-add{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+  }
+  .task-add input{
+    flex:1;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid rgba(43,32,19,.3);
+    background:rgba(255,255,255,.5);
+    font-family:var(--font-sans);
+    font-size:.85rem;
+    color:var(--ink);
+  }
+  .task-add button{
+    padding:8px 12px;
+    border-radius:8px;
+    border:none;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .task-add button:hover{ background:#43331e; }
+
+  .notes-label{
+    display:block;
+    font-size:.7rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+    margin-bottom:4px;
+  }
+  .notes-area{
+    width:100%;
+    min-height:70px;
+    resize:vertical;
+    border-radius:8px;
+    border:1px solid rgba(43,32,19,.3);
+    background:rgba(255,255,255,.4);
+    padding:8px 10px;
+    font-family:var(--font-sans);
+    font-size:.83rem;
+    color:var(--ink);
+  }
+  .save-hint{
+    font-size:.68rem;
+    color:var(--ink-muted);
+    height:14px;
+    margin-top:2px;
+  }
+  .pomo-count{
+    margin-top:12px;
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--ink-muted);
+  }
+
+  /* ---------------- Pomodoro ---------------- */
+  .pomodoro-section{ padding:26px 0; }
+  .pomodoro-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:26px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .pomodoro-timer{
+    font-family:var(--font-mono);
+    font-weight:800;
+    font-size:clamp(2.4rem, 8vw, 3.2rem);
+    letter-spacing:.02em;
+  }
+  .pomodoro-mode{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .pomodoro-mode.break{ color:var(--green); }
+  .pomodoro-controls{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-width:220px;
+  }
+  .pomodoro-controls select{
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--text);
+    font-family:var(--font-sans);
+    font-size:.85rem;
+  }
+  .pomodoro-buttons{ display:flex; gap:8px; }
+  .pomodoro-buttons button{
+    flex:1;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .pomodoro-buttons button.primary{
+    background:var(--gold);
+    color:var(--ink);
+    border-color:var(--gold);
+    font-weight:700;
+  }
+  .pomodoro-buttons button:hover{ filter:brightness(1.1); }
+
+  /* ---------------- Progress ---------------- */
+  .progress-section{ padding:26px 0 40px; }
+  .progress-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+  }
+  .progress-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+    font-family:var(--font-mono);
+  }
+  .progress-top .pct{ color:var(--gold); font-weight:800; font-size:1.3rem; }
+  .overall-bar{
+    height:10px;
+    border-radius:999px;
+    background:var(--bg-2);
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .overall-bar-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--green), var(--gold));
+    transition:width .3s ease;
+  }
+  .progress-breakdown{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:10px;
+    font-family:var(--font-mono);
+    font-size:.75rem;
+  }
+  .progress-breakdown div{ color:var(--muted); }
+  .progress-breakdown span{ color:var(--text); }
+
+  /* ---------------- Footer ---------------- */
+  footer{
+    text-align:center;
+    padding:30px 0 10px;
+    color:var(--muted);
+    font-size:.78rem;
+  }
+  footer button{
+    margin-top:10px;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:7px 14px;
+    border-radius:999px;
+    font-family:var(--font-mono);
+    font-size:.7rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  footer button:hover{ color:var(--red); border-color:var(--red); }
+
+  .save-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:5px 12px;
+    margin-top:14px;
+  }
+  .save-badge .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--green);
+  }
+</style>
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="wrap">
+      <div class="eyebrow">Lourdes Matha College of Science &amp; Technology · CSE</div>
+      <h1>S5 Exam <span class="accent">Countdown</span></h1>
+      <p>First series timetable, August 2026 — five papers, one board. Track your prep, one flap at a time.</p>
+      <div class="save-badge" title="Your checklists and notes are saved on this device only, using your browser's local storage.">
+        <span class="dot"></span> Saved on this device
+      </div>
+    </div>
+  </header>
+
+  <section class="countdown-section">
+    <div class="wrap">
+      <div class="countdown-ticket">
+        <div class="countdown-label" id="countdown-label">Next exam in</div>
+        <div class="countdown-subject" id="countdown-subject">Loading…</div>
+        <div class="flap-group" id="flap-group">
+          <div class="flap-unit">
+            <div class="flap-digits"><span class="flap-digit" id="d-days">00</span></div>
+            <div class="flap-label">Days</div>
+          </div>
+          <div class="flap-colon">:</div>
+          <div class="flap-unit">
+            <div class="flap-digits"><span class="flap-digit" id="d-hours">00</span></div>
+            <div class="flap-label">Hours</div>
+          </div>
+          <div class="flap-colon">:</div>
+          <div class="flap-unit">
+            <div class="flap-digits"><span class="flap-digit" id="d-mins">00</span></div>
+            <div class="flap-label">Mins</div>
+          </div>
+          <div class="flap-colon">:</div>
+          <div class="flap-unit">
+            <div class="flap-digits"><span class="flap-digit" id="d-secs">00</span></div>
+            <div class="flap-label">Secs</div>
+          </div>
+        </div>
+        <div class="countdown-note" id="countdown-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="board-section">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="num">01</span>
+        <h2>Departure board</h2>
+        <span class="hint">S5 · First series</span>
+      </div>
+      <div class="table-scroll">
+        <table class="board">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Code</th>
+              <th>Subject</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="prep-section">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="num">02</span>
+        <h2>Prep tickets</h2>
+        <span class="hint">Checklist + notes per subject</span>
+      </div>
+      <div class="prep-grid" id="prep-grid"></div>
+    </div>
+  </section>
+
+  <section class="pomodoro-section">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="num">03</span>
+        <h2>Focus timer</h2>
+        <span class="hint">25 min study · 5 min break</span>
+      </div>
+      <div class="pomodoro-card">
+        <div>
+          <div class="pomodoro-mode" id="pomo-mode">Study session</div>
+          <div class="pomodoro-timer" id="pomo-display">25:00</div>
+        </div>
+        <div class="pomodoro-controls">
+          <select id="pomo-subject"></select>
+          <div class="pomodoro-buttons">
+            <button type="button" class="primary" id="pomo-start">Start</button>
+            <button type="button" id="pomo-pause">Pause</button>
+            <button type="button" id="pomo-reset">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="progress-section">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="num">04</span>
+        <h2>Overall progress</h2>
+      </div>
+      <div class="progress-card">
+        <div class="progress-top">
+          <span>Prep tasks completed</span>
+          <span class="pct" id="overall-pct">0%</span>
+        </div>
+        <div class="overall-bar"><div class="overall-bar-fill" id="overall-fill"></div></div>
+        <div class="progress-breakdown" id="progress-breakdown"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div>Built for LMCST CSE S5 · August 2026</div>
+      <button type="button" id="reset-all">Clear all saved data</button>
+    </div>
+  </footer>
+
+<script>
+/* ================================================================
+   S5 EXAM PREP — APP LOGIC
+   Written in plain JavaScript, one clearly-named function per job.
+   Read top to bottom: data first, then storage, then each section.
+   ================================================================ */
+
+/* ---------- 1. The exam data, taken straight from the timetable ---------- */
+// Times are written in 24-hour "YYYY-MM-DDTHH:MM:SS" format so the
+// browser can turn them into real Date objects.
+const EXAMS = [
+  { code: 'PCCST503', subject: 'Machine Learning', start: '2026-08-13T10:00:00', end: '2026-08-13T12:00:00', track: 'ml' },
+  { code: 'PCCST502', subject: 'Design & Analysis of Algorithms', start: '2026-08-14T10:00:00', end: '2026-08-14T12:00:00', track: 'daa' },
+  { code: '—', subject: 'Minor', start: '2026-08-14T13:30:00', end: '2026-08-14T15:30:00', track: null },
+  { code: 'PBCST504', subject: 'Microcontrollers', start: '2026-08-17T10:00:00', end: '2026-08-17T12:00:00', track: 'mc' },
+  { code: 'PCCST501', subject: 'Computer Networks', start: '2026-08-17T13:30:00', end: '2026-08-17T15:30:00', track: 'cn' },
+  { code: 'PECST527 / PECST522', subject: 'Computer Graphics & Multimedia / Artificial Intelligence', start: '2026-08-18T10:00:00', end: '2026-08-18T12:00:00', track: 'elective' },
+  { code: '—', subject: 'Honours', start: '2026-08-18T13:30:00', end: '2026-08-18T15:30:00', track: null }
+];
+
+// The five subjects that get their own prep ticket (elective handled separately below).
+const SUBJECTS = [
+  { track: 'ml', code: 'PCCST503', title: 'Machine Learning', date: '13 Aug', time: '10:00 AM' },
+  { track: 'daa', code: 'PCCST502', title: 'Design & Analysis of Algorithms', date: '14 Aug', time: '10:00 AM' },
+  { track: 'mc', code: 'PBCST504', title: 'Microcontrollers', date: '17 Aug', time: '10:00 AM' },
+  { track: 'cn', code: 'PCCST501', title: 'Computer Networks', date: '17 Aug', time: '1:30 PM' }
+];
+
+// The elective slot is one exam but two possible subjects — the student picks which they're taking.
+const ELECTIVE_OPTIONS = {
+  cgm: { code: 'PECST527', title: 'Computer Graphics & Multimedia' },
+  ai:  { code: 'PECST522', title: 'Artificial Intelligence' }
+};
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 2. Storage layer ----------
+   Every checklist, note and pomodoro count goes through this one
+   object. Right now it saves to this browser only (localStorage).
+
+   MongoDB BACKEND
+   The page talks to /api/state. LocalStorage remains as a fallback so
+   the app still works if the backend is temporarily unavailable.
+------------------------------------------------------------------ */
+const Store = {
+  prefix: 's5exam_',
+  api: '/api/state',
+  cache: {},
+  backendOnline: false,
+  get(key, fallback) {
+    if (Object.prototype.hasOwnProperty.call(this.cache, key)) return this.cache[key];
+    try {
+      const raw = localStorage.getItem(this.prefix + key);
+      if (raw === null) return fallback;
+      const value = JSON.parse(raw);
+      this.cache[key] = value;
+      return value;
+    } catch (err) {
+      console.warn('Could not read', key, err);
+      return fallback;
+    }
+  },
+  set(key, value) {
+    this.cache[key] = value;
+    try {
+      localStorage.setItem(this.prefix + key, JSON.stringify(value));
+    } catch (err) {
+      console.warn('Could not save locally', key, err);
+    }
+    this.sync();
+  },
+  snapshot() {
+    return {
+      tasks: Object.fromEntries(Object.entries(this.cache).filter(([k]) => k.startsWith('tasks_')).map(([k,v]) => [k.slice(6), v])),
+      notes: Object.fromEntries(Object.entries(this.cache).filter(([k]) => k.startsWith('notes_')).map(([k,v]) => [k.slice(6), v])),
+      electiveChoice: this.get('electiveChoice', 'cgm'),
+      pomodoroSessions: this.get('pomodoroSessions', {})
+    };
+  },
+  apply(state) {
+    const safe = state || {};
+    Object.entries(safe.tasks || {}).forEach(([track, value]) => { this.cache['tasks_' + track] = value; localStorage.setItem(this.prefix + 'tasks_' + track, JSON.stringify(value)); });
+    Object.entries(safe.notes || {}).forEach(([track, value]) => { this.cache['notes_' + track] = value; localStorage.setItem(this.prefix + 'notes_' + track, JSON.stringify(value)); });
+    if (safe.electiveChoice) { this.cache.electiveChoice = safe.electiveChoice; localStorage.setItem(this.prefix + 'electiveChoice', JSON.stringify(safe.electiveChoice)); }
+    if (safe.pomodoroSessions) { this.cache.pomodoroSessions = safe.pomodoroSessions; localStorage.setItem(this.prefix + 'pomodoroSessions', JSON.stringify(safe.pomodoroSessions)); }
+  },
+  async init() {
+    try {
+      const response = await fetch(this.api, { credentials: 'same-origin' });
+      if (!response.ok) throw new Error('Backend returned ' + response.status);
+      const state = await response.json();
+      this.apply(state);
+      this.backendOnline = true;
+      updateSaveBadge('Backend connected');
+    } catch (err) {
+      console.warn('Backend unavailable; using local storage.', err);
+      this.backendOnline = false;
+      updateSaveBadge('Offline · local backup');
+    }
+  },
+  async sync() {
+    if (!this.backendOnline) return;
+    try {
+      const response = await fetch(this.api, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(this.snapshot())
+      });
+      if (!response.ok) throw new Error('Backend returned ' + response.status);
+      updateSaveBadge('Saved to backend');
+    } catch (err) {
+      console.warn('Backend sync failed; local copy retained.', err);
+      updateSaveBadge('Sync failed · local backup');
+    }
+  }
+};
+
+function updateSaveBadge(text) {
+  const badge = document.querySelector('.save-badge');
+  if (badge) {
+    badge.innerHTML = '<span class="dot"></span> ' + escapeHtml(text);
+    badge.title = 'Your data is synced to the MongoDB backend when connected, with local storage as a fallback.';
+  }
+}
+
+/* ---------- Small helpers ---------- */
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatBoardDate(dateObj) {
+  const day = pad2(dateObj.getDate());
+  const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  return day + ' ' + month;
+}
+
+function formatBoardTime(dateObj) {
+  let hours = dateObj.getHours();
+  const minutes = pad2(dateObj.getMinutes());
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  return hours + ':' + minutes + ' ' + ampm;
+}
+
+/* ================================================================
+   3. DEPARTURE BOARD
+   ================================================================ */
+function renderBoard() {
+  const now = new Date();
+  const tbody = document.getElementById('board-body');
+  tbody.innerHTML = '';
+
+  // Work out which row is the very next thing happening (used to highlight it).
+  let nextIndex = -1;
+  for (let i = 0; i < EXAMS.length; i++) {
+    const end = new Date(EXAMS[i].end);
+    if (end > now) { nextIndex = i; break; }
+  }
+
+  EXAMS.forEach((exam, index) => {
+    const start = new Date(exam.start);
+    const end = new Date(exam.end);
+    const row = document.createElement('tr');
+
+    let statusHtml;
+    if (end < now) {
+      row.classList.add('is-done');
+      statusHtml = '<span class="status-pill done">Done</span>';
+    } else if (start <= now && now <= end) {
+      statusHtml = '<span class="status-pill now">In progress</span>';
+    } else if (index === nextIndex) {
+      row.classList.add('is-next');
+      statusHtml = '<span class="status-pill next">Next</span>';
+    } else {
+      const daysLeft = Math.ceil((start - now) / 86400000);
+      statusHtml = '<span class="status-pill later">In ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '</span>';
+    }
+
+    row.innerHTML =
+      '<td>' + formatBoardDate(start) + '</td>' +
+      '<td>' + formatBoardTime(start) + '</td>' +
+      '<td class="board-code">' + escapeHtml(exam.code) + '</td>' +
+      '<td class="board-subject">' + escapeHtml(exam.subject) + '</td>' +
+      '<td>' + statusHtml + '</td>';
+
+    tbody.appendChild(row);
+  });
+}
+
+/* ================================================================
+   4. COUNTDOWN TICKET (the split-flap display)
+   ================================================================ */
+function setFlapDigit(elementId, newValue) {
+  const el = document.getElementById(elementId);
+  if (el.textContent === newValue) return;
+  if (prefersReducedMotion) {
+    el.textContent = newValue;
+    return;
+  }
+  el.classList.add('flipping');
+  setTimeout(() => {
+    el.textContent = newValue;
+    el.classList.remove('flipping');
+  }, 140);
+}
+
+function findCountdownTarget(now) {
+  for (const exam of EXAMS) {
+    const start = new Date(exam.start);
+    const end = new Date(exam.end);
+    if (now < start) return { exam, target: start, ongoing: false };
+    if (now >= start && now <= end) return { exam, target: end, ongoing: true };
+  }
+  return null; // every exam is over
+}
+
+function tickCountdown() {
+  const now = new Date();
+  const result = findCountdownTarget(now);
+  const labelEl = document.getElementById('countdown-label');
+  const subjectEl = document.getElementById('countdown-subject');
+  const noteEl = document.getElementById('countdown-note');
+
+  if (!result) {
+    labelEl.textContent = 'All done';
+    subjectEl.textContent = 'Every S5 paper is behind you 🎉';
+    noteEl.textContent = 'Hope it went well — you\'ve earned the break.';
+    noteEl.className = 'countdown-note done';
+    ['d-days', 'd-hours', 'd-mins', 'd-secs'].forEach(id => setFlapDigit(id, '00'));
+    return;
+  }
+
+  const { exam, target, ongoing } = result;
+  labelEl.textContent = ongoing ? 'Exam in progress — ends in' : 'Next exam in';
+  subjectEl.innerHTML = (exam.code !== '—' ? '<span class="code">' + escapeHtml(exam.code) + '</span>' : '') + escapeHtml(exam.subject);
+
+  const diff = Math.max(0, target - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  setFlapDigit('d-days', pad2(days));
+  setFlapDigit('d-hours', pad2(hours));
+  setFlapDigit('d-mins', pad2(mins));
+  setFlapDigit('d-secs', pad2(secs));
+
+  if (ongoing) {
+    noteEl.textContent = 'You\'re inside the exam window right now.';
+    noteEl.className = 'countdown-note urgent';
+  } else if (days === 0) {
+    noteEl.textContent = 'It\'s today. Deep breath — you\'ve got this.';
+    noteEl.className = 'countdown-note urgent';
+  } else {
+    noteEl.textContent = '';
+    noteEl.className = 'countdown-note';
+  }
+}
+
+/* ================================================================
+   5. PREP TICKETS — checklist + notes per subject
+   ================================================================ */
+function getTasks(track) {
+  return Store.get('tasks_' + track, []);
+}
+function saveTasks(track, tasks) {
+  Store.set('tasks_' + track, tasks);
+}
+
+function renderTasks(track) {
+  const list = document.querySelector('.task-list[data-track="' + track + '"]');
+  if (!list) return;
+  const tasks = getTasks(track);
+
+  if (tasks.length === 0) {
+    list.innerHTML = '<li class="task-empty">No tasks yet — add your first prep item below.</li>';
+  } else {
+    list.innerHTML = tasks.map(task =>
+      '<li class="task-item" data-id="' + task.id + '">' +
+        '<label>' +
+          '<input type="checkbox" data-action="toggle-task" ' + (task.done ? 'checked' : '') + '>' +
+          '<span class="' + (task.done ? 'done' : '') + '">' + escapeHtml(task.text) + '</span>' +
+        '</label>' +
+        '<button type="button" data-action="edit-task" aria-label="Edit task">✎</button>' +
+        '<button type="button" data-action="delete-task" aria-label="Delete task">✕</button>' +
+      '</li>'
+    ).join('');
+  }
+
+  const done = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const card = list.closest('.ticket-card');
+  card.querySelector('.mini-progress-fill').style.width = pct + '%';
+  card.querySelector('.mini-progress-text').textContent = done + '/' + total + ' done';
+
+  updateOverallProgress();
+}
+
+function getNotes(track) {
+  return Store.get('notes_' + track, '');
+}
+function saveNotes(track, text) {
+  Store.set('notes_' + track, text);
+}
+
+/* Builds the HTML for one prep ticket. `info` needs: track, code, title, date, time */
+function buildTicketHtml(info, extraHeadHtml) {
+  return (
+    '<article class="ticket-card" data-track="' + info.track + '">' +
+      '<div class="ticket-head">' +
+        '<div class="ticket-code">' + escapeHtml(info.code) + '</div>' +
+        '<h3>' + escapeHtml(info.title) + '</h3>' +
+        '<div class="ticket-date">' + info.date + ' · ' + info.time + '</div>' +
+        (extraHeadHtml || '') +
+      '</div>' +
+      '<div class="ticket-perf"></div>' +
+      '<div class="mini-progress-row">' +
+        '<div class="mini-progress"><div class="mini-progress-fill"></div></div>' +
+        '<span class="mini-progress-text">0/0 done</span>' +
+      '</div>' +
+      '<ul class="task-list" data-track="' + info.track + '"></ul>' +
+      '<form class="task-add" data-track="' + info.track + '">' +
+        '<input type="text" placeholder="Add a prep task…" aria-label="New prep task for ' + escapeHtml(info.title) + '" required>' +
+        '<button type="submit">Add</button>' +
+      '</form>' +
+      '<label class="notes-label" for="notes-' + info.track + '">Notes</label>' +
+      '<textarea class="notes-area" id="notes-' + info.track + '" data-track="' + info.track + '" placeholder="Formulas, doubts, things to revisit…"></textarea>' +
+      '<div class="save-hint" data-track="' + info.track + '"></div>' +
+      '<div class="pomo-count" data-track="' + info.track + '">0 focus sessions logged</div>' +
+    '</article>'
+  );
+}
+
+function buildPrepGrid() {
+  const grid = document.getElementById('prep-grid');
+  let html = '';
+
+  SUBJECTS.forEach(subject => {
+    html += buildTicketHtml(subject);
+  });
+
+  // Elective card gets an extra dropdown in its head.
+  const electiveChoice = Store.get('electiveChoice', 'cgm');
+  const electivePicker =
+    '<div class="elective-picker">' +
+      '<label for="elective-select">Taking</label>' +
+      '<select id="elective-select">' +
+        '<option value="cgm"' + (electiveChoice === 'cgm' ? ' selected' : '') + '>Computer Graphics & Multimedia</option>' +
+        '<option value="ai"' + (electiveChoice === 'ai' ? ' selected' : '') + '>Artificial Intelligence</option>' +
+      '</select>' +
+    '</div>';
+
+  const electiveInfo = {
+    track: 'elective_' + electiveChoice,
+    code: ELECTIVE_OPTIONS[electiveChoice].code,
+    title: ELECTIVE_OPTIONS[electiveChoice].title,
+    date: '18 Aug',
+    time: '10:00 AM'
+  };
+  html += buildTicketHtml(electiveInfo, electivePicker);
+
+  grid.innerHTML = html;
+
+  // Fill in notes + task content now that the elements exist.
+  SUBJECTS.forEach(subject => hydrateTicket(subject.track));
+  hydrateTicket(electiveInfo.track);
+
+  // Wire the elective dropdown: switching it swaps which track the card points at.
+  document.getElementById('elective-select').addEventListener('change', (event) => {
+    const newChoice = event.target.value;
+    Store.set('electiveChoice', newChoice);
+    const newTrack = 'elective_' + newChoice;
+    const card = document.querySelector('.prep-grid > article:last-child');
+
+    card.dataset.track = newTrack;
+    card.querySelector('.ticket-code').textContent = ELECTIVE_OPTIONS[newChoice].code;
+    card.querySelector('h3').textContent = ELECTIVE_OPTIONS[newChoice].title;
+    card.querySelector('.task-list').dataset.track = newTrack;
+    card.querySelector('.task-add').dataset.track = newTrack;
+    const textarea = card.querySelector('.notes-area');
+    textarea.id = 'notes-' + newTrack;
+    textarea.dataset.track = newTrack;
+    card.querySelector('.save-hint').dataset.track = newTrack;
+    card.querySelector('.pomo-count').dataset.track = newTrack;
+
+    hydrateTicket(newTrack);
+    populatePomodoroSubjects(); // the elective's display name changed
+  });
+}
+
+function hydrateTicket(track) {
+  renderTasks(track);
+  const textarea = document.getElementById('notes-' + track);
+  if (textarea) textarea.value = getNotes(track);
+  updatePomoCount(track);
+}
+
+/* One delegated listener handles clicks/submits from every prep card,
+   including the elective card after it's swapped. */
+function setupPrepGridEvents() {
+  const grid = document.getElementById('prep-grid');
+
+  grid.addEventListener('submit', (event) => {
+    if (!event.target.classList.contains('task-add')) return;
+    event.preventDefault();
+    const track = event.target.dataset.track;
+    const input = event.target.querySelector('input');
+    const text = input.value.trim();
+    if (!text) return;
+    const tasks = getTasks(track);
+    tasks.push({ id: Date.now() + '-' + Math.floor(Math.random() * 1000), text: text, done: false });
+    saveTasks(track, tasks);
+    renderTasks(track);
+    input.value = '';
+  });
+
+  grid.addEventListener('click', (event) => {
+    const action = event.target.dataset.action;
+    if (!action) return;
+    const li = event.target.closest('.task-item');
+    const list = event.target.closest('.task-list');
+    const track = list.dataset.track;
+    const tasks = getTasks(track);
+    const taskIndex = tasks.findIndex(t => String(t.id) === li.dataset.id);
+    if (taskIndex === -1) return;
+
+    if (action === 'edit-task') {
+      const updated = window.prompt('Edit prep task:', tasks[taskIndex].text);
+      if (updated === null) return;
+      const text = updated.trim();
+      if (!text) return;
+      tasks[taskIndex].text = text;
+      saveTasks(track, tasks);
+      renderTasks(track);
+      return;
+    }
+
+    if (action === 'delete-task') {
+      tasks.splice(taskIndex, 1);
+      saveTasks(track, tasks);
+      renderTasks(track);
+    }
+  });
+
+  grid.addEventListener('change', (event) => {
+    if (event.target.dataset.action !== 'toggle-task') return;
+    const li = event.target.closest('.task-item');
+    const list = event.target.closest('.task-list');
+    const track = list.dataset.track;
+    const tasks = getTasks(track);
+    const task = tasks.find(t => String(t.id) === li.dataset.id);
+    if (!task) return;
+    task.done = event.target.checked;
+    saveTasks(track, tasks);
+    renderTasks(track);
+  });
+
+  let notesTimer = null;
+  grid.addEventListener('input', (event) => {
+    if (!event.target.classList.contains('notes-area')) return;
+    const track = event.target.dataset.track;
+    const hint = document.querySelector('.save-hint[data-track="' + track + '"]');
+    clearTimeout(notesTimer);
+    if (hint) hint.textContent = 'Saving…';
+    notesTimer = setTimeout(() => {
+      saveNotes(track, event.target.value);
+      if (hint) {
+        hint.textContent = 'Saved';
+        setTimeout(() => { hint.textContent = ''; }, 1200);
+      }
+    }, 500);
+  });
+}
+
+/* ================================================================
+   6. OVERALL PROGRESS
+   ================================================================ */
+function currentTrackedTracks() {
+  const electiveChoice = Store.get('electiveChoice', 'cgm');
+  const tracks = SUBJECTS.map(s => s.track);
+  tracks.push('elective_' + electiveChoice);
+  return tracks;
+}
+
+function updateOverallProgress() {
+  const tracks = currentTrackedTracks();
+  let doneTotal = 0;
+  let taskTotal = 0;
+  const breakdownParts = [];
+
+  tracks.forEach(track => {
+    const tasks = getTasks(track);
+    const done = tasks.filter(t => t.done).length;
+    doneTotal += done;
+    taskTotal += tasks.length;
+    const label = trackLabel(track);
+    breakdownParts.push('<div>' + label + '<br><span>' + done + '/' + tasks.length + '</span></div>');
+  });
+
+  const pct = taskTotal === 0 ? 0 : Math.round((doneTotal / taskTotal) * 100);
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('overall-fill').style.width = pct + '%';
+  document.getElementById('progress-breakdown').innerHTML = breakdownParts.join('');
+}
+
+function trackLabel(track) {
+  const subject = SUBJECTS.find(s => s.track === track);
+  if (subject) return subject.title;
+  if (track.startsWith('elective_')) {
+    const key = track.split('_')[1];
+    return ELECTIVE_OPTIONS[key].title;
+  }
+  return track;
+}
+
+/* ================================================================
+   7. POMODORO FOCUS TIMER
+   ================================================================ */
+const pomodoro = {
+  workSeconds: 25 * 60,
+  breakSeconds: 5 * 60,
+  remaining: 25 * 60,
+  mode: 'work', // 'work' or 'break'
+  running: false,
+  intervalId: null
+};
+
+function populatePomodoroSubjects() {
+  const select = document.getElementById('pomo-subject');
+  const tracks = currentTrackedTracks();
+  const previous = select.value;
+  select.innerHTML = tracks.map(track => '<option value="' + track + '">' + escapeHtml(trackLabel(track)) + '</option>').join('');
+  if (tracks.includes(previous)) select.value = previous;
+}
+
+function renderPomodoroDisplay() {
+  const mins = Math.floor(pomodoro.remaining / 60);
+  const secs = pomodoro.remaining % 60;
+  document.getElementById('pomo-display').textContent = pad2(mins) + ':' + pad2(secs);
+  const modeEl = document.getElementById('pomo-mode');
+  modeEl.textContent = pomodoro.mode === 'work' ? 'Study session' : 'Break';
+  modeEl.className = 'pomodoro-mode' + (pomodoro.mode === 'break' ? ' break' : '');
+}
+
+function pomodoroTick() {
+  if (pomodoro.remaining > 0) {
+    pomodoro.remaining--;
+    renderPomodoroDisplay();
+    return;
+  }
+  // Time's up for this segment.
+  if (pomodoro.mode === 'work') {
+    const track = document.getElementById('pomo-subject').value;
+    logPomodoroSession(track);
+    pomodoro.mode = 'break';
+    pomodoro.remaining = pomodoro.breakSeconds;
+  } else {
+    pomodoro.mode = 'work';
+    pomodoro.remaining = pomodoro.workSeconds;
+  }
+  renderPomodoroDisplay();
+}
+
+function logPomodoroSession(track) {
+  const counts = Store.get('pomodoroSessions', {});
+  counts[track] = (counts[track] || 0) + 1;
+  Store.set('pomodoroSessions', counts);
+  updatePomoCount(track);
+}
+
+function updatePomoCount(track) {
+  const counts = Store.get('pomodoroSessions', {});
+  const count = counts[track] || 0;
+  const el = document.querySelector('.pomo-count[data-track="' + track + '"]');
+  if (el) el.textContent = count + ' focus session' + (count === 1 ? '' : 's') + ' logged';
+}
+
+function setupPomodoro() {
+  populatePomodoroSubjects();
+  renderPomodoroDisplay();
+
+  document.getElementById('pomo-start').addEventListener('click', () => {
+    if (pomodoro.running) return;
+    pomodoro.running = true;
+    pomodoro.intervalId = setInterval(pomodoroTick, 1000);
+  });
+
+  document.getElementById('pomo-pause').addEventListener('click', () => {
+    pomodoro.running = false;
+    clearInterval(pomodoro.intervalId);
+  });
+
+  document.getElementById('pomo-reset').addEventListener('click', () => {
+    pomodoro.running = false;
+    clearInterval(pomodoro.intervalId);
+    pomodoro.mode = 'work';
+    pomodoro.remaining = pomodoro.workSeconds;
+    renderPomodoroDisplay();
+  });
+}
+
+/* ================================================================
+   8. RESET BUTTON
+   ================================================================ */
+function setupResetButton() {
+  document.getElementById('reset-all').addEventListener('click', () => {
+    const confirmed = window.confirm('This clears every checklist, note and focus-session count saved on this device. Continue?');
+    if (!confirmed) return;
+    Object.keys(localStorage)
+      .filter(key => key.startsWith(Store.prefix))
+      .forEach(key => localStorage.removeItem(key));
+    location.reload();
+  });
+}
+
+/* ================================================================
+   9. INIT
+   ================================================================ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await Store.init();
+  renderBoard();
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
+  buildPrepGrid();
+  setupPrepGridEvents();
+  updateOverallProgress();
+
+  setupPomodoro();
+  setupResetButton();
+});
+</script>
+</body>
+</html>
