@@ -665,7 +665,7 @@
     <div class="wrap">
       <div class="section-heading">
         <span class="num">02</span>
-        <h2>Prep tickets</h2>
+        <h2>Prep Common Notes</h2>
         <span class="hint">Checklist + notes per subject</span>
       </div>
       <div class="prep-grid" id="prep-grid"></div>
@@ -715,7 +715,7 @@
 
   <footer>
     <div class="wrap">
-      <div>Built for LMCST CSE S5 · August 2026</div>
+      <div>Built for Series Exam</div>
       <button type="button" id="reset-all">Clear all saved data</button>
     </div>
   </footer>
@@ -813,7 +813,7 @@ const Store = {
       const state = await response.json();
       this.apply(state);
       this.backendOnline = true;
-      updateSaveBadge('Backend connected');
+      updateSaveBadge('Notes Live');
     } catch (err) {
       console.warn('Backend unavailable; using local storage.', err);
       this.backendOnline = false;
