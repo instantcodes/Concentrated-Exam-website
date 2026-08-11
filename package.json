@@ -1,0 +1,8 @@
+{
+  "name": "s5-exam-prep",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^6.18.0"
+  }
+}
